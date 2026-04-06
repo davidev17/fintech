@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinBank — DevSecOps Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --surface2: #1a2236;
+      --border: #1e2d45;
+      --accent: #00d4aa;
+      --accent2: #3b82f6;
+      --danger: #f43f5e;
+      --warning: #f59e0b;
+      --text: #e2e8f0;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --success: #10b981;
+      --mono: 'DM Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── AUTH SCREEN ── */
+    #auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: 
+        radial-gradient(ellipse 80% 60% at 50% -20%, rgba(0,212,170,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(59,130,246,0.08) 0%, transparent 50%),
+        var(--bg);
+    }
+
+    .auth-grid {
+      position: absolute; inset: 0;
+      background-image: 
+        linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .auth-card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px;
+      width: 440px;
+      box-shadow: 0 0 60px rgba(0,212,170,0.06), 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-badge {
+      font-family: var(--mono);
+      font-size: 9px;
+      background: rgba(0,212,170,0.15);
+      color: var(--accent);
+      border: 1px solid rgba(0,212,170,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 4px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .form-group { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,212,170,0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #00b894);
+      color: #0a0e1a;
+    }
+
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { background: var(--border); }
+
+    .btn-danger {
+      background: rgba(244,63,94,0.15);
+      color: var(--danger);
+      border: 1px solid rgba(244,63,94,0.3);
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .alert.show { display: block; }
+    .alert-error { background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); color: #fb7185; }
+    .alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+
+    .demo-creds {
+      margin-top: 20px;
+      padding: 14px;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .demo-creds p { font-size: 11px; color: var(--text-muted); font-family: var(--mono); line-height: 1.7; }
+    .demo-creds strong { color: var(--accent); }
+
+    /* ── APP LAYOUT ── */
+    #app-screen { display: none; min-height: 100vh; }
+
+    .app-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      position: fixed;
+      width: 240px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .sidebar-logo .logo-name {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .nav-section {
+      padding: 8px 12px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 0;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .sidebar-user {
+      margin-top: auto;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-info { margin-bottom: 12px; }
+    .user-name { font-size: 14px; font-weight: 700; }
+    .user-role { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+    .user-account { font-size: 11px; color: var(--accent); font-family: var(--mono); margin-top: 2px; }
+
+    /* Main content */
+    .main-content {
+      margin-left: 240px;
+      padding: 32px;
+      min-height: 100vh;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-header {
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    /* Dashboard */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+
+    .stat-card.green::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .stat-card.blue::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+    .stat-card.yellow::before { background: linear-gradient(90deg, var(--warning), transparent); }
+
+    .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
+    .stat-value { font-size: 28px; font-weight: 800; margin: 6px 0 2px; font-family: var(--mono); }
+    .stat-value.green { color: var(--accent); }
+    .stat-value.blue { color: var(--accent2); }
+    .stat-value.yellow { color: var(--warning); }
+    .stat-sub { font-size: 12px; color: var(--text-muted); }
+
+    /* Transactions table */
+    .tx-table { width: 100%; border-collapse: collapse; }
+    .tx-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tx-table td {
+      padding: 14px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(30,45,69,0.5);
+      font-family: var(--mono);
+    }
+
+    .tx-table tr:last-child td { border-bottom: none; }
+    .tx-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--sans);
+    }
+
+    .badge-credit { background: rgba(16,185,129,0.15); color: var(--success); }
+    .badge-debit { background: rgba(244,63,94,0.12); color: var(--danger); }
+    .badge-completed { background: rgba(16,185,129,0.12); color: var(--success); }
+    .badge-pending { background: rgba(245,158,11,0.12); color: var(--warning); }
+    .badge-admin { background: rgba(59,130,246,0.15); color: var(--accent2); }
+
+    /* Transfer form */
+    .transfer-card {
+      max-width: 520px;
+    }
+
+    .amount-input-wrap { position: relative; }
+    .amount-prefix {
+      position: absolute;
+      left: 16px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 14px;
+    }
+    .amount-input-wrap input { padding-left: 48px; }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .upload-zone:hover, .upload-zone.drag { 
+      border-color: var(--accent);
+      background: rgba(0,212,170,0.04);
+    }
+
+    .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-icon { font-size: 36px; margin-bottom: 12px; }
+    .upload-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .upload-sub { font-size: 13px; color: var(--text-muted); }
+
+    .upload-list { margin-top: 20px; }
+    .upload-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+    }
+    .upload-item-icon { font-size: 20px; }
+    .upload-item-name { font-size: 13px; font-family: var(--mono); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .upload-item-size { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+
+    /* Admin */
+    .admin-banner {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(0,212,170,0.08));
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .admin-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+
+    .admin-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .admin-stat-value { font-size: 22px; font-weight: 800; font-family: var(--mono); color: var(--accent); }
+    .admin-stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px; }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: var(--text-muted);
+      gap: 10px;
+    }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px;
+      color: var(--text-muted);
+    }
+    .empty-state .emoji { font-size: 32px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    /* Toasts */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 13px;
+      min-width: 280px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      animation: slideIn 0.3s ease;
+    }
+
+    .toast.success { border-left: 3px solid var(--success); }
+    .toast.error { border-left: 3px solid var(--danger); }
+    .toast.info { border-left: 3px solid var(--accent2); }
+
+    @keyframes slideIn {
+      from { transform: translateX(20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .mb-16 { margin-bottom: 16px; }
+    .mt-16 { margin-top: 16px; }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: var(--mono);
+      font-weight: 500;
+    }
+
+    .tag-green { background: rgba(16,185,129,0.12); color: var(--success); }
+    .tag-blue { background: rgba(59,130,246,0.12); color: var(--accent2); }
+    .tag-red { background: rgba(244,63,94,0.12); color: var(--danger); }
+    .tag-yellow { background: rgba(245,158,11,0.12); color: var(--warning); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    @media (max-width: 900px) {
+      .stats-grid, .admin-stats { grid-template-columns: 1fr 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-grid"></div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">🏦</div>
+      <div>
+        <span class="logo-text">FinBank</span>
+        <span class="logo-badge">LAB</span>
+      </div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Entrar</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Criar conta</button>
+    </div>
+
+    <div id="auth-alert" class="alert"></div>
+
+    <!-- Login form -->
+    <div id="login-form">
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="login-email" placeholder="seu@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="login-password" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">Entrar na conta</button>
+
+      <div class="demo-creds">
+        <p><strong>Admin:</strong> admin@finbank.lab / Admin@123</p>
+        <p><strong>User:</strong> alice@finbank.lab / User@123</p>
+        <p><strong>User:</strong> bruno@finbank.lab / User@123</p>
+      </div>
+    </div>
+
+    <!-- Register form -->
+    <div id="register-form" style="display:none">
+      <div class="form-group">
+        <label>Nome completo</label>
+        <input type="text" id="reg-name" placeholder="Seu nome" />
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="reg-email" placeholder="seu@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="reg-password" placeholder="Mín. 8 chars, maiúscula, número" />
+      </div>
+      <button class="btn btn-primary" onclick="doRegister()">Criar conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="app-screen">
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="logo-icon" style="width:32px;height:32px;font-size:14px">🏦</div>
+          <span class="logo-name">FinBank</span>
+          <span class="logo-badge">LAB</span>
+        </div>
+      </div>
+
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('transfer')">
+        <span class="nav-icon">💸</span> Transferir
+      </div>
+      <div class="nav-item" onclick="showPage('history')">
+        <span class="nav-icon">📋</span> Histórico
+      </div>
+      <div class="nav-item" onclick="showPage('upload')">
+        <span class="nav-icon">📎</span> Documentos
+      </div>
+
+      <div class="nav-section" id="admin-section" style="display:none">Admin</div>
+      <div class="nav-item" id="admin-nav" style="display:none" onclick="showPage('admin')">
+        <span class="nav-icon">🔐</span> Painel Admin
+      </div>
+
+      <div class="sidebar-user">
+        <div class="user-info">
+          <div class="user-name" id="sidebar-name">—</div>
+          <div class="user-role" id="sidebar-role">user</div>
+          <div class="user-account" id="sidebar-account">0000-00000</div>
+        </div>
+        <button class="btn btn-secondary" style="padding:8px;font-size:13px" onclick="doLogout()">Sair</button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="page active">
+        <div class="page-header">
+          <h1>Dashboard</h1>
+          <p>Visão geral da sua conta</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card green">
+            <div class="stat-label">Saldo disponível</div>
+            <div class="stat-value green" id="dash-balance">R$ —</div>
+            <div class="stat-sub">Atualizado agora</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-label">Transações</div>
+            <div class="stat-value blue" id="dash-tx-count">—</div>
+            <div class="stat-sub">Total histórico</div>
+          </div>
+          <div class="stat-card yellow">
+            <div class="stat-label">Conta</div>
+            <div class="stat-value yellow" style="font-size:18px" id="dash-account">—</div>
+            <div class="stat-sub">Número da conta</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Últimas movimentações</div>
+          <div id="dash-tx-list">
+            <div class="loading"><div class="spinner"></div> Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRANSFER -->
+      <div id="page-transfer" class="page">
+        <div class="page-header">
+          <h1>Transferir</h1>
+          <p>Envie dinheiro para outras contas</p>
+        </div>
+
+        <div class="card transfer-card">
+          <div id="transfer-alert" class="alert"></div>
+
+          <div class="form-group">
+            <label>Conta de destino</label>
+            <input type="text" id="transfer-account" placeholder="0000-00000" oninput="searchAccount(this.value)" />
+            <div id="account-suggestions" style="margin-top:6px"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Valor</label>
+            <div class="amount-input-wrap">
+              <span class="amount-prefix">R$</span>
+              <input type="number" id="transfer-amount" placeholder="0,00" min="0.01" step="0.01" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Descrição (opcional)</label>
+            <input type="text" id="transfer-desc" placeholder="Ex: Pagamento de aluguel" maxlength="200" />
+          </div>
+
+          <button class="btn btn-primary" onclick="doTransfer()">Confirmar transferência</button>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div id="page-history" class="page">
+        <div class="page-header">
+          <h1>Histórico</h1>
+          <p>Todas as suas movimentações</p>
+        </div>
+
+        <div class="card">
+          <div id="history-content">
+            <div class="loading"><div class="spinner"></div> Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPLOAD -->
+      <div id="page-upload" class="page">
+        <div class="page-header">
+          <h1>Documentos</h1>
+          <p>Envie comprovantes e documentos</p>
+        </div>
+
+        <div class="card mb-16">
+          <div id="upload-alert" class="alert"></div>
+
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,application/pdf" onchange="handleFileSelect(this)" />
+            <div class="upload-icon">📎</div>
+            <div class="upload-title">Arraste ou clique para enviar</div>
+            <div class="upload-sub">JPEG, PNG, WEBP ou PDF • Máx. 5MB</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Documentos enviados</div>
+          <div id="upload-list">
+            <div class="loading"><div class="spinner"></div> Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <div id="page-admin" class="page">
+        <div class="page-header">
+          <h1>Painel Admin</h1>
+          <p>Visão geral do sistema</p>
+        </div>
+
+        <div class="admin-banner">
+          <span style="font-size:20px">🔐</span>
+          <div>
+            <div style="font-weight:700;font-size:14px">Acesso Administrativo</div>
+            <div style="font-size:12px;color:var(--text-muted)">Dados sensíveis do sistema. DevSecOps Lab.</div>
+          </div>
+        </div>
+
+        <div class="admin-stats" id="admin-stats">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+
+        <div class="card mb-16">
+          <div class="card-title">Todas as transações</div>
+          <div id="admin-tx-list">
+            <div class="loading"><div class="spinner"></div> Carregando...</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Audit log (últimas 50 entradas)</div>
+          <div id="admin-audit-list">
+            <div class="loading"><div class="spinner"></div> Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+const API = '';
+let currentUser = null;
+let authToken = null;
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  const token = localStorage.getItem('finbank_token');
+  const user = localStorage.getItem('finbank_user');
+  if (token && user) {
+    authToken = token;
+    currentUser = JSON.parse(user);
+    showApp();
+  }
+});
+
+// ── AUTH ──
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+  });
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  hideAlert('auth-alert');
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return showAlert('auth-alert', 'Preencha todos os campos.', 'error');
+
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) return showAlert('auth-alert', data.error || 'Erro ao autenticar.', 'error');
+
+    authToken = data.token;
+    currentUser = data.user;
+    localStorage.setItem('finbank_token', authToken);
+    localStorage.setItem('finbank_user', JSON.stringify(currentUser));
+    showApp();
+  } catch (e) {
+    showAlert('auth-alert', 'Erro de conexão.', 'error');
+  }
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value;
+  const email = document.getElementById('reg-email').value;
+  const password = document.getElementById('reg-password').value;
+  if (!name || !email || !password) return showAlert('auth-alert', 'Preencha todos os campos.', 'error');
+
+  try {
+    const res = await fetch(`${API}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      const msg = data.details ? data.details.map(d => d.msg).join(', ') : data.error;
+      return showAlert('auth-alert', msg, 'error');
+    }
+    authToken = data.token;
+    currentUser = data.user;
+    localStorage.setItem('finbank_token', authToken);
+    localStorage.setItem('finbank_user', JSON.stringify(currentUser));
+    showApp();
+    toast('Conta criada com sucesso!', 'success');
+  } catch (e) {
+    showAlert('auth-alert', 'Erro de conexão.', 'error');
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('finbank_token');
+  localStorage.removeItem('finbank_user');
+  authToken = null; currentUser = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+}
+
+// ── APP ──
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+
+  document.getElementById('sidebar-name').textContent = currentUser.name;
+  document.getElementById('sidebar-role').textContent = currentUser.role;
+  document.getElementById('sidebar-account').textContent = currentUser.account_number;
+
+  if (currentUser.role === 'admin') {
+    document.getElementById('admin-section').style.display = 'block';
+    document.getElementById('admin-nav').style.display = 'flex';
+  }
+
+  showPage('dashboard');
+}
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  document.getElementById(`page-${page}`).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.toLowerCase().includes(pageName(page))) n.classList.add('active');
+  });
+
+  if (page === 'dashboard') loadDashboard();
+  if (page === 'history') loadHistory();
+  if (page === 'upload') loadUploads();
+  if (page === 'admin') loadAdmin();
+}
+
+function pageName(p) {
+  const map = { dashboard:'dashboard', transfer:'transferir', history:'histórico', upload:'documentos', admin:'admin' };
+  return map[p] || p;
+}
+
+// ── DASHBOARD ──
+async function loadDashboard() {
+  try {
+    const [meRes, txRes] = await Promise.all([
+      apiFetch('/api/auth/me'),
+      apiFetch('/api/transactions?limit=5')
+    ]);
+
+    currentUser = meRes.user;
+    localStorage.setItem('finbank_user', JSON.stringify(currentUser));
+
+    document.getElementById('dash-balance').textContent = fmtMoney(currentUser.balance);
+    document.getElementById('dash-account').textContent = currentUser.account_number;
+    document.getElementById('dash-tx-count').textContent = txRes.total;
+
+    renderTxTable(txRes.transactions, 'dash-tx-list', true);
+  } catch (e) {
+    document.getElementById('dash-tx-list').innerHTML = '<div class="empty-state"><div class="emoji">⚠️</div><p>Erro ao carregar dados.</p></div>';
+  }
+}
+
+// ── HISTORY ──
+async function loadHistory() {
+  document.getElementById('history-content').innerHTML = '<div class="loading"><div class="spinner"></div> Carregando...</div>';
+  try {
+    const data = await apiFetch('/api/transactions?limit=100');
+    renderTxTable(data.transactions, 'history-content', false);
+  } catch (e) {
+    document.getElementById('history-content').innerHTML = '<div class="empty-state"><div class="emoji">⚠️</div><p>Erro ao carregar.</p></div>';
+  }
+}
+
+function renderTxTable(txs, containerId, compact) {
+  const el = document.getElementById(containerId);
+  if (!txs || txs.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="emoji">💤</div><p>Nenhuma movimentação encontrada.</p></div>';
+    return;
+  }
+
+  el.innerHTML = `<table class="tx-table">
+    <thead><tr>
+      <th>Tipo</th><th>De / Para</th><th>Valor</th><th>Descrição</th><th>Data</th><th>Status</th>
+    </tr></thead>
+    <tbody>${txs.map(tx => {
+      const isDebit = tx.direction === 'debit';
+      const counterpart = isDebit ? (tx.receiver_name || '—') : (tx.sender_name || 'Depósito');
+      const sign = isDebit ? '-' : '+';
+      const color = isDebit ? 'var(--danger)' : 'var(--success)';
+      return `<tr>
+        <td><span class="badge ${isDebit ? 'badge-debit' : 'badge-credit'}">${isDebit ? 'Débito' : 'Crédito'}</span></td>
+        <td>${counterpart}</td>
+        <td style="color:${color};font-weight:700">${sign} ${fmtMoney(tx.amount)}</td>
+        <td style="color:var(--text-dim)">${tx.description || '—'}</td>
+        <td>${fmtDate(tx.created_at)}</td>
+        <td><span class="badge badge-${tx.status}">${tx.status}</span></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+// ── TRANSFER ──
+let searchTimer;
+async function searchAccount(val) {
+  const el = document.getElementById('account-suggestions');
+  if (val.length < 3) { el.innerHTML = ''; return; }
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(async () => {
+    try {
+      const data = await apiFetch(`/api/users/accounts?account=${encodeURIComponent(val)}`);
+      if (!data.accounts.length) { el.innerHTML = ''; return; }
+      el.innerHTML = data.accounts.map(a => `
+        <div onclick="selectAccount('${a.account_number}', '${a.name}')" style="padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:4px;font-size:13px;font-family:var(--mono)">
+          <strong style="font-family:var(--sans)">${a.name}</strong> — ${a.account_number}
+        </div>`).join('');
+    } catch {}
+  }, 300);
+}
+
+function selectAccount(account, name) {
+  document.getElementById('transfer-account').value = account;
+  document.getElementById('account-suggestions').innerHTML =
+    `<div style="padding:8px 12px;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.3);border-radius:8px;font-size:13px">✓ ${name} · ${account}</div>`;
+}
+
+async function doTransfer() {
+  const toAccountNumber = document.getElementById('transfer-account').value.trim();
+  const amount = parseFloat(document.getElementById('transfer-amount').value);
+  const description = document.getElementById('transfer-desc').value.trim();
+
+  if (!toAccountNumber || !amount) return showAlert('transfer-alert', 'Preencha conta e valor.', 'error');
+
+  try {
+    const res = await fetch(`${API}/api/transactions/transfer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ toAccountNumber, amount, description })
+    });
+    const data = await res.json();
+    if (!res.ok) return showAlert('transfer-alert', data.error, 'error');
+
+    showAlert('transfer-alert', `Transferência de ${fmtMoney(amount)} realizada com sucesso!`, 'success');
+    document.getElementById('transfer-account').value = '';
+    document.getElementById('transfer-amount').value = '';
+    document.getElementById('transfer-desc').value = '';
+    document.getElementById('account-suggestions').innerHTML = '';
+    toast('Transferência concluída!', 'success');
+  } catch (e) {
+    showAlert('transfer-alert', 'Erro na transferência.', 'error');
+  }
+}
+
+// ── UPLOADS ──
+async function loadUploads() {
+  try {
+    const data = await apiFetch('/api/uploads');
+    const el = document.getElementById('upload-list');
+    if (!data.uploads.length) {
+      el.innerHTML = '<div class="empty-state"><div class="emoji">📂</div><p>Nenhum documento enviado.</p></div>';
+      return;
+    }
+    el.innerHTML = data.uploads.map(u => `
+      <div class="upload-item">
+        <div class="upload-item-icon">${u.mimetype === 'application/pdf' ? '📄' : '🖼️'}</div>
+        <div class="upload-item-name">${u.original_name}</div>
+        <div class="upload-item-size">${fmtSize(u.size)} · ${fmtDate(u.created_at)}</div>
+      </div>`).join('');
+  } catch {}
+}
+
+async function handleFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('document', file);
+
+  showAlert('upload-alert', 'Enviando arquivo...', 'success');
+
+  try {
+    const res = await fetch(`${API}/api/uploads`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authToken}` },
+      body: formData
+    });
+    const data = await res.json();
+    if (!res.ok) return showAlert('upload-alert', data.error, 'error');
+    showAlert('upload-alert', `"${file.name}" enviado com sucesso!`, 'success');
+    loadUploads();
+    toast('Documento enviado!', 'success');
+    input.value = '';
+  } catch (e) {
+    showAlert('upload-alert', 'Erro no upload.', 'error');
+  }
+}
+
+// drag-and-drop
+document.addEventListener('DOMContentLoaded', () => {
+  const zone = document.getElementById('upload-zone');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const input = document.getElementById('file-input');
+      const dt = new DataTransfer(); dt.items.add(file);
+      input.files = dt.files;
+      handleFileSelect(input);
+    }
+  });
+});
+
+// ── ADMIN ──
+async function loadAdmin() {
+  try {
+    const data = await apiFetch('/api/admin/dashboard');
+
+    document.getElementById('admin-stats').innerHTML = `
+      <div class="admin-stat"><div class="admin-stat-value">${data.stats.totalUsers}</div><div class="admin-stat-label">Usuários</div></div>
+      <div class="admin-stat"><div class="admin-stat-value">${data.stats.totalTransactions}</div><div class="admin-stat-label">Transações</div></div>
+      <div class="admin-stat"><div class="admin-stat-value">${fmtMoney(data.stats.totalVolume)}</div><div class="admin-stat-label">Volume total</div></div>
+      <div class="admin-stat"><div class="admin-stat-value">${data.stats.totalUploads}</div><div class="admin-stat-label">Uploads</div></div>
+    `;
+
+    const txData = await apiFetch('/api/admin/transactions?limit=50');
+    const txEl = document.getElementById('admin-tx-list');
+    if (!txData.transactions.length) {
+      txEl.innerHTML = '<div class="empty-state"><div class="emoji">💤</div><p>Sem transações.</p></div>';
+    } else {
+      txEl.innerHTML = `<table class="tx-table">
+        <thead><tr><th>De</th><th>Para</th><th>Valor</th><th>Tipo</th><th>Descrição</th><th>Data</th></tr></thead>
+        <tbody>${txData.transactions.map(tx => `<tr>
+          <td>${tx.sender_name || '—'} <br><span style="color:var(--text-muted);font-size:11px">${tx.sender_account || ''}</span></td>
+          <td>${tx.receiver_name || '—'} <br><span style="color:var(--text-muted);font-size:11px">${tx.receiver_account || ''}</span></td>
+          <td style="color:var(--accent);font-weight:700">${fmtMoney(tx.amount)}</td>
+          <td><span class="tag tag-blue">${tx.type}</span></td>
+          <td style="color:var(--text-dim)">${tx.description || '—'}</td>
+          <td>${fmtDate(tx.created_at)}</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+    }
+
+    const auditEl = document.getElementById('admin-audit-list');
+    if (!data.recentActivity.length) {
+      auditEl.innerHTML = '<div class="empty-state"><div class="emoji">📋</div><p>Sem atividade.</p></div>';
+    } else {
+      auditEl.innerHTML = `<table class="tx-table">
+        <thead><tr><th>Ação</th><th>Usuário</th><th>IP</th><th>Data</th></tr></thead>
+        <tbody>${data.recentActivity.map(log => {
+          const color = log.action.includes('FAIL') ? 'tag-red' : log.action.includes('LOGIN') ? 'tag-green' : 'tag-blue';
+          return `<tr>
+            <td><span class="tag ${color}">${log.action}</span></td>
+            <td>${log.name || '—'}<br><span style="font-size:11px;color:var(--text-muted)">${log.email || ''}</span></td>
+            <td style="color:var(--text-muted)">${log.ip_address || '—'}</td>
+            <td>${fmtDate(log.created_at)}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`;
+    }
+  } catch (e) {
+    document.getElementById('admin-stats').innerHTML = '<div class="empty-state"><div class="emoji">⚠️</div><p>Erro ao carregar painel.</p></div>';
+  }
+}
+
+// ── UTILS ──
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(`${API}${path}`, {
+    ...opts,
+    headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json', ...opts.headers }
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error);
+  return data;
+}
+
+function fmtMoney(v) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+}
+
+function fmtDate(d) {
+  return new Date(d).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function fmtSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1048576) return `${(bytes/1024).toFixed(1)} KB`;
+  return `${(bytes/1048576).toFixed(1)} MB`;
+}
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.className = `alert alert-${type} show`;
+  el.textContent = msg;
+  if (type === 'success') setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function hideAlert(id) { document.getElementById(id).classList.remove('show'); }
+
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span> ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// Enter key on auth
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('login-form').style.display !== 'none') doLogin();
+    else doRegister();
+  }
+});
+</script>
+</body>
+</html>

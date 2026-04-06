@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: finbank-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://finbank:finbank123@postgres:5432/finbank
+      - JWT_SECRET=super-insecure-jwt-secret-change-me-in-prod
+      - JWT_EXPIRES_IN=24h
+      - UPLOAD_DIR=/app/uploads
+      - MAX_FILE_SIZE=5242880
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - finbank-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: finbank-postgres
+    environment:
+      - POSTGRES_USER=finbank
+      - POSTGRES_PASSWORD=finbank123
+      - POSTGRES_DB=finbank
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finbank"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - finbank-network
+
+volumes:
+  postgres_data:
+
+networks:
+  finbank-network:
+    driver: bridge
