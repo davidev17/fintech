@@ -64,7 +64,7 @@ jobs:
           REGISTER_CODE=$(curl -s -o /tmp/register-response.json -w "%{http_code}" \
             -X POST http://localhost:3000/api/auth/register \
             -H "Content-Type: application/json" \
-            -d "{\"name\":\"CI User\",\"email\":\"$EMAIL\",\"password\":\"123456\"}")
+            -d "{\"name\":\"CI User\",\"email\":\"$EMAIL\",\"password\":\"Teste@123\"}")
 
           echo "REGISTER STATUS: $REGISTER_CODE"
           echo "REGISTER BODY:"
