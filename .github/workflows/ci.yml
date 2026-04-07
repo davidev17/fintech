@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Build local stack
+        run: docker compose -f docker-compose-local.yml up -d --build
+
+      - name: Wait for app health
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:3000/health; then
+              echo "App pronta"
+              exit 0
+            fi
+            echo "Aguardando app..."
+            sleep 5
+          done
+          echo "App não respondeu a tempo"
+          docker compose -f docker-compose-local.yml logs
+          exit 1
+
+      - name: Smoke test - health
+        run: curl -fsS http://localhost:3000/health
+
+      - name: Smoke test - uploads writable
+        run: docker compose -f docker-compose-local.yml exec -T app sh -c 'test -w /app/uploads && touch /app/uploads/ci-test.txt && rm -f /app/uploads/ci-test.txt'
+
+      - name: Smoke test - upload endpoint
+        run: |
+          code=$(curl -s -o /tmp/upload-response.txt -w "%{http_code}" \
+            -X POST http://localhost:3000/api/uploads \
+            -F "file=@tests/fixtures/teste.jpg")
+          cat /tmp/upload-response.txt
+          test "$code" = "200" -o "$code" = "201"
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose -f docker-compose-local.yml logs
+
+      - name: Teardown
+        if: always()
+        run: docker compose -f docker-compose-local.yml down -v
