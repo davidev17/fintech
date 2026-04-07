@@ -55,11 +55,39 @@ jobs:
       - name: Check upload fixture exists
         run: ls -l tests/fixtures
 
+      - name: Register test user and get token
+        run: |
+          EMAIL="ci$(date +%s)@test.com"
+
+          echo "Registrando usuário: $EMAIL"
+
+          REGISTER_CODE=$(curl -s -o /tmp/register-response.json -w "%{http_code}" \
+            -X POST http://localhost:3000/api/auth/register \
+            -H "Content-Type: application/json" \
+            -d "{\"name\":\"CI User\",\"email\":\"$EMAIL\",\"password\":\"123456\"}")
+
+          echo "REGISTER STATUS: $REGISTER_CODE"
+          echo "REGISTER BODY:"
+          cat /tmp/register-response.json
+          echo
+
+          test "$REGISTER_CODE" = "200" -o "$REGISTER_CODE" = "201"
+
+          TOKEN=$(node -e "const fs=require('fs'); const data=JSON.parse(fs.readFileSync('/tmp/register-response.json','utf8')); console.log(data.token || data.accessToken || (data.user && data.user.token) || '')")
+
+          if [ -z \"$TOKEN\" ]; then
+            echo "Token não encontrado na resposta do register"
+            exit 1
+          fi
+
+          echo "TOKEN=$TOKEN" >> $GITHUB_ENV
+
       - name: Smoke test - upload endpoint
         run: |
-          echo "Testando upload..."
+          echo "Testando upload autenticado..."
           code=$(curl -s -o /tmp/upload-response.txt -w "%{http_code}" \
             -X POST http://localhost:3000/api/uploads \
+            -H "Authorization: Bearer $TOKEN" \
             -F "file=@tests/fixtures/teste.jpg")
 
           echo "STATUS: $code"
