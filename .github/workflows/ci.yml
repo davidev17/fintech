@@ -88,7 +88,7 @@ jobs:
           code=$(curl -s -o /tmp/upload-response.txt -w "%{http_code}" \
             -X POST http://localhost:3000/api/uploads \
             -H "Authorization: Bearer $TOKEN" \
-            -F "file=@tests/fixtures/teste.jpg")
+            -F "document=@tests/fixtures/teste.jpg")
 
           echo "STATUS: $code"
           echo "BODY:"
