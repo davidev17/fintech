@@ -1,5 +1,6 @@
 const request = require('supertest');
-const app = require('../../src/server');
+const app = require('../../src/app');
+const { pool } = require('../../src/db');
 
 describe('Auth Integration', () => {
   test('deve retornar erro ao logar com dados inválidos', async () => {
@@ -7,7 +8,7 @@ describe('Auth Integration', () => {
       .post('/api/auth/login')
       .send({
         email: 'invalido@test.com',
-        password: '123456'
+        password: 'Teste@123'
       });
 
     expect(res.statusCode).toBeGreaterThanOrEqual(400);
@@ -19,10 +20,17 @@ describe('Auth Integration', () => {
       .send({
         name: 'Teste',
         email: `teste${Date.now()}@test.com`,
-        password: '123456'
+        password: 'Teste@123'
       });
+
     console.log('REGISTER STATUS:', res.statusCode);
     console.log('REGISTER BODY:', res.body);
+
     expect([200, 201]).toContain(res.statusCode);
   });
+});
+
+// 🔥 FECHA O POOL
+afterAll(async () => {
+  await pool.end();
 });
