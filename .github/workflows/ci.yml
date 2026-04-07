@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      DATABASE_URL: postgresql://finbank:finbank123@localhost:5432/finbank
 
     steps:
       - name: Checkout
@@ -25,11 +26,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run unit tests
-        run: npm run test:unit
-
       - name: Build local stack
         run: docker compose -f docker-compose-local.yml up -d --build
+
+      - name: Wait for database
+        run: |
+          for i in {1..30}; do
+            if docker compose -f docker-compose-local.yml exec -T postgres pg_isready -U finbank; then
+              echo "Banco pronto"
+              exit 0
+            fi
+            echo "Aguardando banco..."
+            sleep 5
+          done
+          echo "Banco não respondeu a tempo"
+          docker compose -f docker-compose-local.yml logs
+          exit 1
 
       - name: Wait for app health
         run: |
@@ -45,6 +57,12 @@ jobs:
           docker compose -f docker-compose-local.yml logs
           exit 1
 
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Run integration tests
+        run: npm run test:integration
+
       - name: Smoke test - health
         run: curl -fsS http://localhost:3000/health
 
@@ -58,13 +76,14 @@ jobs:
       - name: Register test user and get token
         run: |
           EMAIL="ci$(date +%s)@test.com"
+          PASSWORD="Teste@123"
 
           echo "Registrando usuário: $EMAIL"
 
           REGISTER_CODE=$(curl -s -o /tmp/register-response.json -w "%{http_code}" \
             -X POST http://localhost:3000/api/auth/register \
             -H "Content-Type: application/json" \
-            -d "{\"name\":\"CI User\",\"email\":\"$EMAIL\",\"password\":\"Teste@123\"}")
+            -d "{\"name\":\"CI User\",\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}")
 
           echo "REGISTER STATUS: $REGISTER_CODE"
           echo "REGISTER BODY:"
@@ -75,7 +94,7 @@ jobs:
 
           TOKEN=$(node -e "const fs=require('fs'); const data=JSON.parse(fs.readFileSync('/tmp/register-response.json','utf8')); console.log(data.token || data.accessToken || (data.user && data.user.token) || '')")
 
-          if [ -z \"$TOKEN\" ]; then
+          if [ -z "$TOKEN" ]; then
             echo "Token não encontrado na resposta do register"
             exit 1
           fi
