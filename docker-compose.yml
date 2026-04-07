@@ -41,18 +41,18 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./uploads:/app/uploads
+      - uploads_data:/app/uploads
     networks:
       - finbank-network
     restart: unless-stopped
     labels:
       - traefik.enable=true
-      - traefik.http.routers.finbank.rule=Host(`fintech.davidev.cloud`,`www.fintech.davidev.cloud`)
+      - traefik.http.routers.finbank.rule=Host(`fintech.davidev.cloud`) || Host(`www.fintech.davidev.cloud`)
       - traefik.http.routers.finbank.entrypoints=websecure
       - traefik.http.routers.finbank.tls=true
       - traefik.http.routers.finbank.tls.certresolver=le
       - traefik.http.services.finbank.loadbalancer.server.port=3000
-      - traefik.http.routers.finbank-http.rule=Host(`fintech.davidev.cloud`,`www.fintech.davidev.cloud`)
+      - traefik.http.routers.finbank-http.rule=Host(`fintech.davidev.cloud`) || Host(`www.fintech.davidev.cloud`)
       - traefik.http.routers.finbank-http.entrypoints=web
       - traefik.http.routers.finbank-http.middlewares=redirect-to-https
       - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
@@ -78,6 +78,7 @@ services:
 
 volumes:
   postgres_data:
+  uploads_data:
 
 networks:
   finbank-network:

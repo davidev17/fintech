@@ -21,7 +21,8 @@ describe('Auth Integration', () => {
         email: `teste${Date.now()}@test.com`,
         password: '123456'
       });
-
+    console.log('REGISTER STATUS:', res.statusCode);
+    console.log('REGISTER BODY:', res.body);
     expect([200, 201]).toContain(res.statusCode);
   });
 });

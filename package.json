@@ -4,15 +4,14 @@
   "description": "Laboratório DevSecOps - Aplicação bancária simulada com vulnerabilidades intencionais",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "test": "jest",
-    "test:unit": "jest tests/unit",
+    "start": "node src/server.js",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "jest tests/unit --runInBand",
     "test:integration": "jest tests/integration --runInBand",
-    "test:api": "newman run tests/api/collection.json",
     "test:e2e": "cypress run",
-    "lint": "eslint .",
-    "smoke": "node scripts/smoke.js"
+    "test:smoke": "bash tests/smoke/run-smoke.sh",
+    "test:upload": "bash tests/smoke/test-upload.sh",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:smoke && npm run test:e2e"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
